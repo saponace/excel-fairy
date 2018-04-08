@@ -27,9 +27,9 @@ function getColumnC(inputRow, inputSheetCode) {
 function getColumnD(inputRow, inputSheetCode) {
     switch (inputSheetCode){
         case 'IF':
-            return castStringToDateIfString(inputRow[letterToColumnStart0('F')]);
+            return inputRow[letterToColumnStart0('F')];
         case 'RD':
-            return castStringToDateIfString(inputRow[letterToColumnStart0('E')]);
+            return inputRow[letterToColumnStart0('E')];
         default:
             return null;
     }

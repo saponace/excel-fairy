@@ -46,7 +46,6 @@ function mergeIfAndRD(ifValues, rdValues){
     return retVal;
 }
 
-//FIXME
 function sortOutputOnAgreementDate(values){
     return values.sort(function(a, b){
         return compareDates(a[letterToColumnStart0('D')], b[letterToColumnStart0('D')]);
@@ -63,13 +62,7 @@ function cleanMergedData(){
     }
 }
 
-// function stringifyDates(values){
-//     for(var i=0; i < values.length; i++){
-//         values[i][letterToColumnStart0('D')] = values[i][letterToColumnStart0('D')].format('d/m/y');
-//     }
-// }
-
-function importInMergedData() {
+function mergeData() {
     cleanMergedData();
 
     var ifNbRows = IF_SHEET.getLastRow();
@@ -81,7 +74,6 @@ function importInMergedData() {
 
     var outputValues = mergeIfAndRD(ifValues, rdValues);
     outputValues = sortOutputOnAgreementDate(outputValues);
-    // stringifyDates(outputValues);
 
     var outputRange = MERGED_DATA_SHEET.getRange(2, letterToColumn('A'), outputValues.length, outputValues[0].length);
     outputRange.setValues(outputValues);
