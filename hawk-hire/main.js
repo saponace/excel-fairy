@@ -126,6 +126,10 @@ function serviceSheetIsServiceMode(){
     return getTask() === "Service";
 }
 
+function serviceSheetIsRepairMode(){
+    return getTask() === "Repair";
+}
+
 function getTask(){
     return SPREADSHEET.sheets.serviceSheet.sheet.getRange(SPREADSHEET.sheets.serviceSheet.taskTypeCell).getValue();
 }
@@ -200,7 +204,7 @@ function copyDataToServiceRegistry(){
         values[0][SERVICE_REGISTER_SPREADSHEET.dateLastServiceCompletedColumnOffset] = getTaskDate();
         equipmentRow.setValues(values);
     }
-    if(serviceSheetIsInspectionMode()){
+    if(serviceSheetIsInspectionMode() || serviceSheetIsRepairMode()){
         values[0][SERVICE_REGISTER_SPREADSHEET.partsRequiredForNextService] = getAllComments();
         equipmentRow.setValues(values);
     }
