@@ -3,17 +3,18 @@ var SS = SpreadsheetApp.getActiveSpreadsheet();
 var MERGED_DATA_SHEET = SS.getSheetByName("Merged Data");
 var IF_SHEET = SS.getSheetByName("Fifo IF Transactions (This month)");
 var RD_SHEET = SS.getSheetByName("Fifo RD Transactions (This Month)");
+var LOAN_SHEET = SS.getSheetByName("Fifo LOAN Transactions");
 
 
 /**
  * Get output column from input column
- * @param inputSheetCode The input sheet code. Should either be 'IF' or 'RD'
+ * @param inputSheetCode The input sheet code. Should either be 'IF', 'RD' OR 'LOAN'
  * @param inputRow The input row containing data
  * @return {Array} The output row
  */
 function processRow(inputRow, inputSheetCode) {
     var retVal = [];
-    for (var i = 0; i < inputRow.length; i++) {
+    for (var i = 0; i <= letterToColumnStart0('P'); i++) {
         var inputColumn = columnToLetterStart0(i);
         switch (inputColumn) {
             case 'A': retVal[letterToColumnStart0('A')] = getColumnA(inputRow, inputSheetCode); break;
@@ -31,18 +32,21 @@ function processRow(inputRow, inputSheetCode) {
             case 'M': retVal[letterToColumnStart0('M')] = getColumnM(inputRow, inputSheetCode); break;
             case 'N': retVal[letterToColumnStart0('N')] = getColumnN(inputRow, inputSheetCode); break;
             case 'O': retVal[letterToColumnStart0('O')] = getColumnO(inputRow, inputSheetCode); break;
+            case 'P': retVal[letterToColumnStart0('P')] = getColumnP(inputRow, inputSheetCode); break;
         }
     }
     return retVal;
 }
 
-function mergeIfAndRD(ifValues, rdValues){
+function mergeInputData(ifValues, rdValues, loanValues){
     var retVal = [];
     var i;
     for(i=0; i < ifValues.length; i++)
         retVal.push(processRow(ifValues[i], 'IF'));
     for(i=0; i < rdValues.length; i++)
         retVal.push(processRow(rdValues[i], 'RD'));
+    for(i=0; i < loanValues.length; i++)
+        retVal.push(processRow(loanValues[i], 'LOAN'));
     return retVal;
 }
 
@@ -67,12 +71,15 @@ function mergeData() {
 
     var ifNbRows = IF_SHEET.getLastRow();
     var rdNbRows = RD_SHEET.getLastRow();
+    var loanNbRows = LOAN_SHEET.getLastRow();
     var ifNbColumns = IF_SHEET.getLastColumn();
     var rdNbColumns = RD_SHEET.getLastColumn();
+    var loanNbColumns = LOAN_SHEET.getLastColumn();
     var ifValues = IF_SHEET.getRange(2, letterToColumn('A'), ifNbRows-1, ifNbColumns).getValues();
     var rdValues = RD_SHEET.getRange(2, letterToColumn('A'), rdNbRows-1, rdNbColumns).getValues();
+    var loanValues = LOAN_SHEET.getRange(2, letterToColumn('A'), loanNbRows-1, loanNbColumns).getValues();
 
-    var outputValues = mergeIfAndRD(ifValues, rdValues);
+    var outputValues = mergeInputData(ifValues, rdValues, loanValues);
     outputValues = sortOutputOnAgreementDate(outputValues);
 
     var outputRange = MERGED_DATA_SHEET.getRange(2, letterToColumn('A'), outputValues.length, outputValues[0].length);

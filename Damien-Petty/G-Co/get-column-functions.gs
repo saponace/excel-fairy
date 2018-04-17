@@ -1,5 +1,5 @@
 function getColumnA(inputRow, inputSheetCode) {
-    return inputRow[letterToColumnStart0('A')];
+    return inputRow[letterToColumnStart0('B')];
 }
 
 function getColumnB(inputRow, inputSheetCode) {
@@ -58,7 +58,7 @@ function getColumnG(inputRow, inputSheetCode){
     var e = getColumnE(inputRow, inputSheetCode);
     var f = getColumnF(inputRow, inputSheetCode);
     if(!!e && !!f && f !== 0)
-        return e/f;
+        return f/e;
     else
         return null;
 }
@@ -100,7 +100,7 @@ function getColumnK(inputRow, inputSheetCode) {
 }
 function getColumnL(inputRow, inputSheetCode) {
     //TODO
-    return "MOCK";
+    return "";
 }
 function getColumnM(inputRow, inputSheetCode) {
     switch (inputSheetCode){
@@ -117,7 +117,7 @@ function getColumnM(inputRow, inputSheetCode) {
 }
 function getColumnN(inputRow, inputSheetCode) {
     //TODO
-    return "MOCK";
+    return "";
 }
 function getColumnO(inputRow, inputSheetCode) {
     switch (inputSheetCode){
@@ -128,4 +128,8 @@ function getColumnO(inputRow, inputSheetCode) {
         default:
             return null;
     }
+}
+function getColumnP(inputRow, inputSheetCode) {
+    //TODO
+    return "";
 }
