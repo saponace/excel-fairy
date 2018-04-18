@@ -28,6 +28,7 @@ var SERVICE_REGISTER_SPREADSHEET = {
     hoursColumnOffset: 2,
     lastServiceCompletedColumnOffset: 3,
     dateLastServiceCompletedColumnOffset: 4,
+    nextServiceDueColumnOffset: 5,
     partsRequiredForNextService: 6
 };
 
@@ -202,6 +203,7 @@ function copyDataToServiceRegistry(){
         values[0][SERVICE_REGISTER_SPREADSHEET.hoursColumnOffset] = getMachineHours();
         values[0][SERVICE_REGISTER_SPREADSHEET.lastServiceCompletedColumnOffset] = getTaskType();
         values[0][SERVICE_REGISTER_SPREADSHEET.dateLastServiceCompletedColumnOffset] = getTaskDate();
+        values[0][SERVICE_REGISTER_SPREADSHEET.nextServiceDueColumnOffset] = parseInt(getTaskType()) + 250;
         equipmentRow.setValues(values);
     }
     if(serviceSheetIsInspectionMode() || serviceSheetIsRepairMode()){
