@@ -12,13 +12,18 @@ var INTEREST_STATEMENT_SHEET = {
         c2: 8
     }
 };
-var EMAIL_LIST_SHEET = {
-    sheet: SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Email list"),
-    recipientsListRange:{
+
+var ENTITIES_SHEET = {
+    sheet: SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Entity"),
+    entityNameColumn: letterToColumnStart0('A'),
+    emailAddressColumn: letterToColumnStart0('G'),
+    emailSubjectColumn: letterToColumnStart0('M'),
+    emailBodyColumn: letterToColumnStart0('N'),
+    entitiesListRange:{
         r1: 3,
-        r2: SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Email list").getLastRow() - 2,
-        c1: 1,
-        c2: 3
+        r2: SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Entity").getLastRow(),
+        c1: letterToColumn('A'),
+        c2: letterToColumn('N')
     }
 };
 
@@ -36,20 +41,18 @@ function exportToPdf() {
     var exportedFile = savePdf(exportOptions);
     var totalValue = INTEREST_STATEMENT_SHEET.sheet.getRange(INTEREST_STATEMENT_SHEET.totalCell).getValue();
     if(totalValue !== 0)
-        sendEmails(exportedFile);
+        sendEmail(exportedFile);
 }
 
-function sendEmails(attachment) {
-    var emails = EMAIL_LIST_SHEET.sheet.getRange(EMAIL_LIST_SHEET.recipientsListRange.r1,
-        EMAIL_LIST_SHEET.recipientsListRange.c1,
-        EMAIL_LIST_SHEET.recipientsListRange.r2,
-        EMAIL_LIST_SHEET.recipientsListRange.c2).getValues();
-
-    for (var i=0; i < emails.length; i++){
-        var email = emails[i];
-        var recipient = email[0];
-        var subject = email[1];
-        var message = email[2];
+function sendEmail(attachment) {
+    var entityName = INTEREST_STATEMENT_SHEET.sheet.getRange(INTEREST_STATEMENT_SHEET.entityCell).getValue();
+    var entity = getEntityFromName(entityName);
+    if(!entity)
+        SpreadsheetApp.getActiveSpreadsheet().toast('Entity ' + entityName + ' not found in entities list. No email sent');
+    else {
+        var recipient = entity[ENTITIES_SHEET.emailAddressColumn];
+        var subject = entity[ENTITIES_SHEET.emailSubjectColumn];
+        var message = entity[ENTITIES_SHEET.emailBodyColumn];
         var emailOptions = {
             attachments: [attachment.getAs(MimeType.PDF)],
             name: 'Automatic loan tracker mail sender'
@@ -58,4 +61,15 @@ function sendEmails(attachment) {
     }
 }
 
+function getEntityFromName(entityName){
+    var entities = ENTITIES_SHEET.sheet.getRange(ENTITIES_SHEET.entitiesListRange.r1,
+        ENTITIES_SHEET.entitiesListRange.c1,
+        ENTITIES_SHEET.entitiesListRange.r2 - ENTITIES_SHEET.entitiesListRange.r1,
+        ENTITIES_SHEET.entitiesListRange.c2 - ENTITIES_SHEET.entitiesListRange.c1+1).getValues();
 
+    for (var i=0; i < entities.length; i++){
+        if(entities[i][ENTITIES_SHEET.entityNameColumn] === entityName)
+            return entities[i];
+    }
+    return null;
+}
