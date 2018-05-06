@@ -3,13 +3,14 @@ var INTEREST_STATEMENT_SHEET = {
     name: 'Interest statement',
     sheet: SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Interest statement'),
     dateCell: 'H1',
+    totalCell: 'H35',
+    entityCell: 'C3',
     pdfExportRange: {
         r1: 5,
         r2: 47,
         c1: 1,
         c2: 8
-    },
-    totalCell: 'H35'
+    }
 };
 var EMAIL_LIST_SHEET = {
     sheet: SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Email list"),
@@ -23,8 +24,9 @@ var EMAIL_LIST_SHEET = {
 
 function exportToPdf() {
     var dateStr = INTEREST_STATEMENT_SHEET.sheet.getRange(INTEREST_STATEMENT_SHEET.dateCell).getValue();
+    var entity = INTEREST_STATEMENT_SHEET.sheet.getRange(INTEREST_STATEMENT_SHEET.entityCell).getValue();
+    var fileName = entity + ' - ' + INTEREST_STATEMENT_SHEET.name + ' - ' + dateStr;
     var exportFolderId = getFolderToExportPdfTo(EXPORT_FOLDER_ID, dateStr).getId();
-    var fileName = INTEREST_STATEMENT_SHEET.name + ' ' + dateStr;
 
     var exportOptions = {
         exportFolderId: exportFolderId,
