@@ -8,7 +8,8 @@ var INTEREST_STATEMENT_SHEET = {
         r2: 47,
         c1: 1,
         c2: 8
-    }
+    },
+    totalCell: 'H35'
 };
 var EMAIL_LIST_SHEET = {
     sheet: SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Email list"),
@@ -31,7 +32,9 @@ function exportToPdf() {
         range: INTEREST_STATEMENT_SHEET.pdfExportRange
     };
     var exportedFile = savePdf(exportOptions);
-    sendEmails(exportedFile);
+    var totalValue = INTEREST_STATEMENT_SHEET.sheet.getRange(INTEREST_STATEMENT_SHEET.totalCell).getValue();
+    if(totalValue !== 0)
+        sendEmails(exportedFile);
 }
 
 function sendEmails(attachment) {
