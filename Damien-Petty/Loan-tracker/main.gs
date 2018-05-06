@@ -21,9 +21,9 @@ var EMAIL_LIST_SHEET = {
 };
 
 function exportToPdf() {
-    var date = INTEREST_STATEMENT_SHEET.sheet.getRange(INTEREST_STATEMENT_SHEET.dateCell).getValue();
-    var exportFolderId = getFolderToExportPdfTo(EXPORT_FOLDER_ID, date).getId();
-    var fileName = INTEREST_STATEMENT_SHEET.name + ' ' + date;
+    var dateStr = INTEREST_STATEMENT_SHEET.sheet.getRange(INTEREST_STATEMENT_SHEET.dateCell).getValue();
+    var exportFolderId = getFolderToExportPdfTo(EXPORT_FOLDER_ID, dateStr).getId();
+    var fileName = INTEREST_STATEMENT_SHEET.name + ' ' + dateStr;
 
     var exportOptions = {
         exportFolderId: exportFolderId,
@@ -31,10 +31,10 @@ function exportToPdf() {
         range: INTEREST_STATEMENT_SHEET.pdfExportRange
     };
     var exportedFile = savePdf(exportOptions);
-    sendemails(exportedFile);
+    sendEmails(exportedFile);
 }
 
-function sendemails(attachment) {
+function sendEmails(attachment) {
     var emails = EMAIL_LIST_SHEET.sheet.getRange(EMAIL_LIST_SHEET.recipientsListRange.r1,
         EMAIL_LIST_SHEET.recipientsListRange.c1,
         EMAIL_LIST_SHEET.recipientsListRange.r2,
