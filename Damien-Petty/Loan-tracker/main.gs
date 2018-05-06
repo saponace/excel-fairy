@@ -27,7 +27,18 @@ var ENTITIES_SHEET = {
     }
 };
 
-function exportToPdf() {
+function exportInterestStatements() {
+    var entitiesNames = getEntitiesNames();
+    var interval = 6000; // Interval in ms between two exports. Google spreadsheet API (used to export sheet to PDF.
+    // Returns HTTP 429 for rate limiting if too many requests are sent simultaneously
+    for(var i=0; i < entitiesNames.length; i++){
+        INTEREST_STATEMENT_SHEET.sheet.getRange(INTEREST_STATEMENT_SHEET.entityCell).setValue(entitiesNames[i]);
+        exportInterestStatementForCurrentEntity();
+        Utilities.sleep(interval);
+    }
+}
+
+function exportInterestStatementForCurrentEntity(){
     var dateStr = INTEREST_STATEMENT_SHEET.sheet.getRange(INTEREST_STATEMENT_SHEET.dateCell).getValue();
     var entity = INTEREST_STATEMENT_SHEET.sheet.getRange(INTEREST_STATEMENT_SHEET.entityCell).getValue();
     var fileName = entity + ' - ' + INTEREST_STATEMENT_SHEET.name + ' - ' + dateStr;
@@ -59,6 +70,14 @@ function sendEmail(attachment) {
         };
         MailApp.sendEmail(recipient, subject, message, emailOptions);
     }
+}
+
+function getEntitiesNames(){
+    var entities = ENTITIES_SHEET.sheet.getRange(ENTITIES_SHEET.entitiesListRange.r1,
+        ENTITIES_SHEET.entitiesListRange.c1,
+        ENTITIES_SHEET.entitiesListRange.r2 - ENTITIES_SHEET.entitiesListRange.r1,
+        ENTITIES_SHEET.entitiesListRange.c2 - ENTITIES_SHEET.entitiesListRange.c1+1).getValues();
+    return entities.map(function(entity){return entity[ENTITIES_SHEET.entityNameColumn];});
 }
 
 function getEntityFromName(entityName){
