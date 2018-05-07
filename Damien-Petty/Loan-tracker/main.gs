@@ -29,12 +29,17 @@ var ENTITIES_SHEET = {
 
 function exportInterestStatements() {
     var entitiesNames = getEntitiesNames();
-    var interval = 6000; // Interval in ms between two exports. Google spreadsheet API (used to export sheet to PDF.
+    var sheetUpdateInterval = 500; // Interval in ms between two entities switch. To let the spreadsheet to update itself. Not sure if needed
+    var gSpreadSheetRateLimitingMinInterval = 6000; // Interval in ms between two exports. Google spreadsheet API (used to export sheet to PDF.
     // Returns HTTP 429 for rate limiting if too many requests are sent simultaneously
     for(var i=0; i < entitiesNames.length; i++){
         INTEREST_STATEMENT_SHEET.sheet.getRange(INTEREST_STATEMENT_SHEET.entityCell).setValue(entitiesNames[i]);
-        exportInterestStatementForCurrentEntity();
-        Utilities.sleep(interval);
+        var totalValue = INTEREST_STATEMENT_SHEET.sheet.getRange(INTEREST_STATEMENT_SHEET.totalCell).getValue();
+        Utilities.sleep(sheetUpdateInterval);
+        if(totalValue !== 0){
+            exportInterestStatementForCurrentEntity();
+            Utilities.sleep(gSpreadSheetRateLimitingMinInterval-sheetUpdateInterval);
+        }
     }
 }
 
@@ -50,9 +55,7 @@ function exportInterestStatementForCurrentEntity(){
         range: INTEREST_STATEMENT_SHEET.pdfExportRange
     };
     var exportedFile = savePdf(exportOptions);
-    var totalValue = INTEREST_STATEMENT_SHEET.sheet.getRange(INTEREST_STATEMENT_SHEET.totalCell).getValue();
-    if(totalValue !== 0)
-        sendEmail(exportedFile);
+    sendEmail(exportedFile);
 }
 
 function sendEmail(attachment) {
