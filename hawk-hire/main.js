@@ -86,8 +86,8 @@ function getTasksListRange(nbLines){
     return SPREADSHEET.sheets.serviceSheet.sheet.getRange(TASK_LIST_COORDINATES.row, TASK_LIST_COORDINATES.col, nbLines, TASK_LIST_COORDINATES.nbCols);
 }
 
-function getTasksListRangeWithoutHeader(nbLines){
-    return SPREADSHEET.sheets.serviceSheet.sheet.getRange(TASK_LIST_COORDINATES.row + 1, TASK_LIST_COORDINATES.col, nbLines, TASK_LIST_COORDINATES.nbCols);
+function getTasksListStartLineEndLine(startLineOffset, endLineOffset){
+    return SPREADSHEET.sheets.serviceSheet.sheet.getRange(TASK_LIST_COORDINATES.row + startLineOffset, TASK_LIST_COORDINATES.col, endLineOffset, TASK_LIST_COORDINATES.nbCols);
 }
 
 function getNbTasks(){
@@ -204,19 +204,36 @@ function copyDataToServiceRegistry(){
         values[0][SERVICE_REGISTER_SPREADSHEET.lastServiceCompletedColumnOffset] = getTaskType();
         values[0][SERVICE_REGISTER_SPREADSHEET.dateLastServiceCompletedColumnOffset] = getTaskDate();
         values[0][SERVICE_REGISTER_SPREADSHEET.nextServiceDueColumnOffset] = parseInt(getTaskType()) + 250;
-        equipmentRow.setValues(values);
     }
-    if(serviceSheetIsInspectionMode() || serviceSheetIsRepairMode()){
-        values[0][SERVICE_REGISTER_SPREADSHEET.partsRequiredForNextService] = getAllComments();
-        equipmentRow.setValues(values);
-    }
+    values[0][SERVICE_REGISTER_SPREADSHEET.partsRequiredForNextService] = getComments();
+
+    equipmentRow.setValues(values);
 }
 
-function getAllComments(){
-    var commentsRange = getTasksListRangeWithoutHeader(getNbTasks());
+function getComments(){
+    var i;
+    var firstRowOffset, nbRows;
+    if(serviceSheetIsServiceMode()){
+        var tasksListRange = getTasksListRange(getNbTasks());
+        var tasksListValues = tasksListRange.getValues();
+        for (i = 0; i < tasksListValues.length; i++) {
+            var firstCellContent = tasksListValues[i][0];
+            if(!firstRowOffset && firstCellContent === 'Additional parts - Description')
+                firstRowOffset = i+1;
+            if(!!firstRowOffset && !nbRows && firstCellContent === 'Inspect')
+                nbRows = i - firstRowOffset;
+        }
+        if(!firstRowOffset || !nbRows) // Either beginning or end of comment section not found
+            return '';
+    }
+    if(serviceSheetIsInspectionMode() || serviceSheetIsRepairMode()){
+        firstRowOffset = 1;
+        nbRows = getNbTasks();
+    }
+    var commentsRange = getTasksListStartLineEndLine(firstRowOffset, nbRows);
     var commentsValues = commentsRange.getValues();
     var retVal = '';
-    for(var i=0; i < commentsValues.length; i++){
+    for(i=0; i < commentsValues.length; i++){
         var line = '';
         for(var j=0; j < commentsValues[i].length; j++){
             var comment = commentsValues[i][j];
