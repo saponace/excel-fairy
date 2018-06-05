@@ -1,5 +1,5 @@
 /**
- * v0.1
+ * v0.1 - custom
  * Export one or all sheets in a spreadsheet as PDF files on user's Google Drive,
  * in same folder that contained original spreadsheet.
  *
@@ -83,7 +83,7 @@ function save(opts) {
         + '&sheetnames=false&printtitle=false&pagenumbers=false'  //hide optional headers and footers
         + '&gridlines=false'  // hide gridlines
         + rangeParameters     // range
-        + '&fzr=false';       // do not repeat row headers (frozen rows) on each page
+        + '&fzr=true';       // do not repeat row headers (frozen rows) on each page
 
     var options = {
         headers: {
