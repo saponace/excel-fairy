@@ -1,9 +1,9 @@
 /**
- * v0.2
- * Export one or all sheets in a spreadsheet as PDF files on user's Google Drive,
- * in same folder that contained original spreadsheet.
+ * v0.1 - 20180706
+ * Export a sheet in a spreadsheet on user's Google Drive
  *
- * Adapted from https://code.google.com/p/google-apps-script-issues/issues/detail?id=3579#c25
+ * Adapted from https://stackoverflow.com/questions/47289834/export-multiple-sheets-in-a-single-pdf
+ * More info: https://stackoverflow.com/questions/11619805/using-the-google-drive-api-to-download-a-spreadsheet-in-csv-format
  *
  * @param {Object}  opts       (optional) Export options
  *                                Can contain any combination of fields
@@ -19,9 +19,10 @@
  *                                        c1: 0,
  *                                        c2: 0
  *                                    }
+ *                                    fileFormat: csv, pdf, etc.(?)
  *                                }
  */
-function savePdf(opts) {
+function exportFile(opts) {
 
     opts = !!opts ? opts : {};
 
@@ -73,9 +74,12 @@ function savePdf(opts) {
         }
     }
 
-//additional parameters for exporting the sheet as a pdf
-    var url_ext = 'export?exportFormat=pdf&format=pdf'   //export as pdf
-        + '&gid=' + sheet.getSheetId()   //the sheet's Id
+    // Additional parameters
+    var fileFormat = 'pdf';
+    if(opts.fileFormat && (opts.fileFormat === 'csv' || opts.fileFormat === 'pdf'))
+        fileFormat = opts.fileFormat;
+    var url_ext = 'export?exportFormat=' + fileFormat + '&format=' + fileFormat
+        + '&gid=' + sheet.getSheetId()
         // following parameters are optional...
         + '&size=letter'      // paper size
         + '&portrait=true'    // orientation, false for landscape
@@ -95,9 +99,9 @@ function savePdf(opts) {
 
     var fileName;
     if(opts.exportFileName)
-        fileName = opts.exportFileName + '.pdf';
+        fileName = opts.exportFileName + '.' + fileFormat;
     else
-        fileName = ss.getName() + ' - ' + sheet.getName() + '.pdf';
+        fileName = ss.getName() + ' - ' + sheet.getName() + '.' + fileFormat;
 
     var blob = response.getBlob().setName(fileName);
     return folder.createFile(blob);

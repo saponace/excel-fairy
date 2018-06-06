@@ -27,6 +27,24 @@ var ENTITIES_SHEET = {
     }
 };
 
+var INVOICES_SHEET = {
+    name: 'Invoices',
+    sheet: SpreadsheetApp.getActiveSpreadsheet().getSheetByName("CSV file export"),
+    descriptionColumn: letterToColumnStart0('Q'),
+    invoiceNumberColumn: letterToColumnStart0('K'),
+    exportRange:{
+        r1: 1,
+        r2: SpreadsheetApp.getActiveSpreadsheet().getSheetByName("CSV file export").getLastRow(),
+        c1: letterToColumn('A'),
+        c2: letterToColumn('AA')
+    }
+};
+
+var CALC_SHEET = {
+    sheet: SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Calc"),
+    lastInvoiceNumberCell: 'I2'
+};
+
 function exportInterestStatements() {
     var entitiesNames = getEntitiesNames();
     var sheetUpdateInterval = 500; // Interval in ms between two entities switch. To let the spreadsheet to update itself. Not sure if needed
@@ -54,7 +72,7 @@ function exportInterestStatementForCurrentEntity(){
         exportFileName: fileName,
         range: INTEREST_STATEMENT_SHEET.pdfExportRange
     };
-    var exportedFile = savePdf(exportOptions);
+    var exportedFile = exportFile(exportOptions);
     sendEmail(exportedFile);
 }
 
@@ -94,4 +112,54 @@ function getEntityFromName(entityName){
             return entities[i];
     }
     return null;
+}
+
+
+
+function exportInvoices(){
+    var dateStr = INTEREST_STATEMENT_SHEET.sheet.getRange(INTEREST_STATEMENT_SHEET.dateCell).getValue();
+    var fileName = INVOICES_SHEET.name + ' - ' + dateStr;
+    var exportFolderId = getFolderToExportPdfTo(EXPORT_FOLDER_ID, dateStr).getId();
+
+    var invoices = INVOICES_SHEET.sheet.getRange(
+        INVOICES_SHEET.exportRange.r1,
+        INVOICES_SHEET.exportRange.c1,
+        INVOICES_SHEET.exportRange.r2 - INVOICES_SHEET.exportRange.r1,
+        INVOICES_SHEET.exportRange.c2 - INVOICES_SHEET.exportRange.c1 + 1
+    ).getValues();
+
+    var i = invoices.length;
+    var lastInvoiceNumber = null;
+    while (i--){
+        var invoice = invoices[i];
+        if (invoice[INVOICES_SHEET.descriptionColumn] === '')
+            invoices.splice(i, 1);
+        else if (!lastInvoiceNumber)
+            lastInvoiceNumber = invoice[INVOICES_SHEET.invoiceNumberColumn];
+    }
+
+    var tempFilterSheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet('temp filter sheet');
+    tempFilterSheet.getRange(
+        INVOICES_SHEET.exportRange.r1,
+        INVOICES_SHEET.exportRange.c1,
+        invoices.length,
+        INVOICES_SHEET.exportRange.c2 - INVOICES_SHEET.exportRange.c1 + 1
+    ).setValues(invoices);
+
+
+    var exportOptions = {
+        sheetId: tempFilterSheet.getSheetId(),
+        exportFolderId: exportFolderId,
+        exportFileName: fileName,
+        range: {
+            r1: INVOICES_SHEET.exportRange.r1 - 1,
+            r2: tempFilterSheet.getLastRow(),
+            c1: INVOICES_SHEET.exportRange.c1 - 1,
+            c2: INVOICES_SHEET.exportRange.c2
+        },
+        fileFormat: 'csv'
+    };
+    exportFile(exportOptions);
+    CALC_SHEET.sheet.getRange(CALC_SHEET.lastInvoiceNumberCell).setValue(lastInvoiceNumber);
+    SpreadsheetApp.getActiveSpreadsheet().deleteSheet(tempFilterSheet);
 }
