@@ -19,11 +19,12 @@ var ENTITIES_SHEET = {
     emailAddressColumn: letterToColumnStart0('G'),
     emailSubjectColumn: letterToColumnStart0('M'),
     emailBodyColumn: letterToColumnStart0('N'),
+    carbonCopyEmailAddressesColumn: letterToColumnStart0('O'),
     entitiesListRange:{
         r1: 3,
         r2: SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Entity").getLastRow(),
         c1: letterToColumn('A'),
-        c2: letterToColumn('N')
+        c2: letterToColumn('O')
     }
 };
 
@@ -85,9 +86,11 @@ function sendEmail(attachment) {
         var recipient = entity[ENTITIES_SHEET.emailAddressColumn];
         var subject = entity[ENTITIES_SHEET.emailSubjectColumn];
         var message = entity[ENTITIES_SHEET.emailBodyColumn];
+        var carbonCopyEmailAddresses = entity[ENTITIES_SHEET.carbonCopyEmailAddressesColumn];
         var emailOptions = {
             attachments: [attachment.getAs(MimeType.PDF)],
-            name: 'Automatic loan tracker mail sender'
+            name: 'Automatic loan tracker mail sender',
+            cc: carbonCopyEmailAddresses
         };
         MailApp.sendEmail(recipient, subject, message, emailOptions);
     }
